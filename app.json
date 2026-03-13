@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "PulseLink",
+    "slug": "pulselink",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "android": {
+      "package": "com.pulselink.app"
+    },
+    "splash": {
+      "backgroundColor": "#FFF7D1"
+    }
+  }
+}
