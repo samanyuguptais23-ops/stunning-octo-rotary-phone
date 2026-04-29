@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+*.egg-link
+pip-wheel-metadata/
+.installed.cfg
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+
+# IDEs
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+
+# Data — keep folder stubs, ignore actual images/datasets
+data/raw/
+data/processed/
+*.csv
+*.npy
+*.npz
+
+# Model artefacts
+models/*.pkl
+models/*.joblib
+models/*.h5
+models/*.pt
+models/*.onnx
+
+# Reports (keep folder stub)
+reports/*.json
+reports/*.html
+reports/*.png
+
+# Misc
+*.log
+*.tmp
