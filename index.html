@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Heavenly Ascension</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0c12;
+        --card: #171a24;
+        --card-glow: rgba(94, 129, 255, 0.15);
+        --accent: #7fb5ff;
+        --accent-strong: #b9d7ff;
+        --danger: #ff6b6b;
+        --success: #8dd37f;
+        --text: #e6e9f5;
+        --muted: #9aa4c7;
+      }
+
+      * {
+        box-sizing: border-box;
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top, #15192c 0%, #090a10 55%, #05060a 100%);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      #app {
+        width: min(980px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      header.stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(6px);
+      }
+
+      .stat-card {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .stat-header {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 600;
+        color: var(--accent-strong);
+      }
+
+      .stat-bar {
+        width: 100%;
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+      }
+
+      .stat-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+        transition: width 0.4s ease;
+        box-shadow: 0 0 18px rgba(127, 181, 255, 0.6);
+      }
+
+      .stat-value {
+        text-align: right;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 18px;
+      }
+
+      .main-card {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.9rem;
+        letter-spacing: 0.04em;
+      }
+
+      .realm-info,
+      .phase-info,
+      .actions,
+      .summary {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .realm-info span,
+      .phase-info span {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .phase-title {
+        font-weight: 600;
+        color: var(--accent-strong);
+        font-size: 1.05rem;
+      }
+
+      .actions button {
+        padding: 12px 16px;
+        font-size: 1rem;
+        border-radius: 12px;
+        border: none;
+        background: rgba(127, 181, 255, 0.18);
+        color: var(--text);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .actions button:hover:not(:disabled) {
+        background: rgba(127, 181, 255, 0.32);
+        transform: translateY(-1px);
+      }
+
+      .actions button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .side-card {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+      }
+
+      #bolt-layer {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 4;
+      }
+
+      .bolt {
+        position: absolute;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(127, 181, 255, 0.75) 35%, rgba(127, 181, 255, 0) 70%);
+        box-shadow: 0 0 28px rgba(127, 181, 255, 0.85), 0 0 55px rgba(127, 181, 255, 0.4);
+        animation: pulse 1s ease-in-out infinite;
+        cursor: pointer;
+        pointer-events: auto;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(0.9);
+          opacity: 0.75;
+        }
+        50% {
+          transform: scale(1.08);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(0.92);
+          opacity: 0.8;
+        }
+      }
+
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(8, 9, 15, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 6;
+        padding: 24px;
+      }
+
+      .overlay.hidden {
+        display: none;
+      }
+
+      .overlay-card {
+        max-width: 520px;
+        width: 100%;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .overlay-card h2 {
+        margin: 0;
+        font-size: 1.6rem;
+      }
+
+      .overlay-card p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .overlay-card button {
+        align-self: center;
+        padding: 12px 20px;
+        font-size: 1rem;
+        border-radius: 12px;
+        border: none;
+        background: var(--accent);
+        color: #0b0c12;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      .overlay-card button:hover {
+        transform: translateY(-1px);
+      }
+
+      .rating {
+        font-size: 1.2rem;
+        color: var(--accent-strong);
+        font-weight: 600;
+      }
+
+      @media (max-width: 860px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <header class="stats">
+        <div class="card stat-card">
+          <div class="stat-header">
+            <span>Constitution</span>
+            <span id="con-value">500</span>
+          </div>
+          <div class="stat-bar">
+            <div id="con-bar" class="stat-fill"></div>
+          </div>
+          <div class="stat-value">Endure the tribulation of the heavens.</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-header">
+            <span>Comprehension</span>
+            <span id="com-value">450</span>
+          </div>
+          <div class="stat-bar">
+            <div id="com-bar" class="stat-fill"></div>
+          </div>
+          <div class="stat-value">Refine insight through still meditation.</div>
+        </div>
+      </header>
+
+      <main>
+        <section class="card main-card">
+          <h1>Heavenly Ascension</h1>
+          <div class="realm-info">
+            <strong id="current-realm"></strong>
+            <span id="next-realm"></span>
+          </div>
+          <div class="phase-info">
+            <div class="phase-title" id="phase-title"></div>
+            <span id="phase-detail"></span>
+          </div>
+          <div class="actions">
+            <button id="meditate-btn">Meditate (+20 COM)</button>
+            <button id="temper-btn">Temper Body (+25 CON)</button>
+            <button id="breakthrough-btn">Attempt Breakthrough</button>
+          </div>
+        </section>
+
+        <aside class="card side-card">
+          <div class="summary">
+            <h2>Journey Log</h2>
+            <div class="summary-item">
+              <span>Total Cultivation Clicks</span>
+              <span id="total-clicks">0</span>
+            </div>
+            <div class="summary-item">
+              <span>Tribulations Survived</span>
+              <span id="tribulations">0</span>
+            </div>
+            <div class="summary-item">
+              <span>Breakthrough Failures</span>
+              <span id="failures">0</span>
+            </div>
+          </div>
+          <div class="card" style="background: rgba(255, 255, 255, 0.03);">
+            <h3>Tribulation Warning</h3>
+            <p style="margin: 0; color: var(--muted);">
+              Every third cultivation click invites weak lightning. In a breakthrough, three bolts will strike in
+              succession—dodge them swiftly.
+            </p>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <div id="bolt-layer"></div>
+
+    <div id="end-screen" class="overlay hidden">
+      <div class="card overlay-card">
+        <h2 id="end-title"></h2>
+        <p id="end-message"></p>
+        <div id="end-stats"></div>
+        <div id="end-rating" class="rating"></div>
+        <button id="restart-btn">Restart Journey</button>
+      </div>
+    </div>
+
+    <script>
+      const realms = [
+        { name: "Foundation Establishment", con: 500, com: 450 },
+        { name: "Qi Sensing", con: 700, com: 620 },
+        { name: "Golden Core", con: 950, com: 850 },
+        { name: "Nascent Soul", con: 1250, com: 1100 },
+        { name: "Soul Wandering", con: 1600, com: 1400 },
+        { name: "Body Enlightenment", con: 2000, com: 1750 },
+        { name: "Void Walking", con: 2500, com: 2150 },
+        { name: "Ascension Realm", con: 3100, com: 2650 },
+        { name: "Immortal", con: 4000, com: 3500 },
+      ];
+
+      const MAX_CON = 4000;
+      const MAX_COM = 3500;
+
+      const state = {
+        con: 500,
+        com: 450,
+        realmIndex: 0,
+        phase: "cultivation",
+        cultivationClicks: 0,
+        tribulationsSurvived: 0,
+        breakthroughFailures: 0,
+        lightningActive: false,
+      };
+
+      const elements = {
+        conValue: document.getElementById("con-value"),
+        comValue: document.getElementById("com-value"),
+        conBar: document.getElementById("con-bar"),
+        comBar: document.getElementById("com-bar"),
+        currentRealm: document.getElementById("current-realm"),
+        nextRealm: document.getElementById("next-realm"),
+        phaseTitle: document.getElementById("phase-title"),
+        phaseDetail: document.getElementById("phase-detail"),
+        meditateBtn: document.getElementById("meditate-btn"),
+        temperBtn: document.getElementById("temper-btn"),
+        breakthroughBtn: document.getElementById("breakthrough-btn"),
+        totalClicks: document.getElementById("total-clicks"),
+        tribulations: document.getElementById("tribulations"),
+        failures: document.getElementById("failures"),
+        boltLayer: document.getElementById("bolt-layer"),
+        endScreen: document.getElementById("end-screen"),
+        endTitle: document.getElementById("end-title"),
+        endMessage: document.getElementById("end-message"),
+        endStats: document.getElementById("end-stats"),
+        endRating: document.getElementById("end-rating"),
+        restartBtn: document.getElementById("restart-btn"),
+      };
+
+      const activeTimers = new Set();
+
+      const clearBolts = () => {
+        elements.boltLayer.innerHTML = "";
+        activeTimers.forEach((timer) => clearTimeout(timer));
+        activeTimers.clear();
+      };
+
+      const updateBars = () => {
+        const conPercent = Math.min(state.con / MAX_CON, 1) * 100;
+        const comPercent = Math.min(state.com / MAX_COM, 1) * 100;
+        elements.conBar.style.width = `${conPercent}%`;
+        elements.comBar.style.width = `${comPercent}%`;
+      };
+
+      const nextRealm = () => realms[state.realmIndex + 1];
+
+      const canBreakthrough = () => {
+        const target = nextRealm();
+        if (!target) return false;
+        return state.con >= target.con && state.com >= target.com;
+      };
+
+      const updateUI = () => {
+        elements.conValue.textContent = state.con;
+        elements.comValue.textContent = state.com;
+        updateBars();
+
+        const current = realms[state.realmIndex];
+        elements.currentRealm.textContent = `Current Realm: ${current.name}`;
+
+        const target = nextRealm();
+        elements.nextRealm.textContent = target
+          ? `Next Realm: ${target.name} (CON ${target.con}, COM ${target.com})`
+          : "Final realm attained.";
+
+        elements.totalClicks.textContent = state.cultivationClicks;
+        elements.tribulations.textContent = state.tribulationsSurvived;
+        elements.failures.textContent = state.breakthroughFailures;
+
+        if (state.phase === "cultivation") {
+          elements.phaseTitle.textContent = "Cultivation Phase";
+          elements.phaseDetail.textContent = state.lightningActive
+            ? "Weak lightning descends — click the bolt to dodge."
+            : canBreakthrough()
+            ? "Your foundation is ready. Attempt the breakthrough."
+            : "Meditate or temper your body to reach the next realm.";
+        } else if (state.phase === "breakthrough") {
+          elements.phaseTitle.textContent = "Breakthrough Phase";
+          elements.phaseDetail.textContent = "Tribulation in progress — three bolts will strike.";
+        }
+
+        const disableActions = state.phase !== "cultivation" || state.lightningActive;
+        elements.meditateBtn.disabled = disableActions;
+        elements.temperBtn.disabled = disableActions;
+        elements.breakthroughBtn.disabled = disableActions || !canBreakthrough();
+      };
+
+      const checkGameOver = () => {
+        if (state.con <= 0 || state.com <= 0) {
+          state.con = Math.max(0, state.con);
+          state.com = Math.max(0, state.com);
+          state.phase = "gameover";
+          showEndScreen(
+            "The Heavens have rejected you",
+            "Your mortal spirit faltered beneath the tribulation.",
+            "",
+            ""
+          );
+          return true;
+        }
+        return false;
+      };
+
+      const applyStatChange = (conDelta, comDelta) => {
+        state.con += conDelta;
+        state.com += comDelta;
+        return !checkGameOver();
+      };
+
+      const showBolt = (duration, onSuccess, onFail) => {
+        const bolt = document.createElement("div");
+        bolt.className = "bolt";
+
+        const padding = 80;
+        const maxX = window.innerWidth - padding;
+        const maxY = window.innerHeight - padding;
+        const x = Math.max(padding, Math.random() * maxX);
+        const y = Math.max(padding, Math.random() * maxY);
+        bolt.style.left = `${x}px`;
+        bolt.style.top = `${y}px`;
+
+        let resolved = false;
+        const cleanup = () => {
+          bolt.remove();
+        };
+
+        bolt.addEventListener("click", () => {
+          if (resolved) return;
+          resolved = true;
+          cleanup();
+          onSuccess();
+        });
+
+        elements.boltLayer.appendChild(bolt);
+
+        const timer = setTimeout(() => {
+          if (resolved) return;
+          resolved = true;
+          cleanup();
+          onFail();
+        }, duration);
+        activeTimers.add(timer);
+      };
+
+      const triggerWeakLightning = () => {
+        state.lightningActive = true;
+        updateUI();
+        showBolt(
+          2000,
+          () => {
+            state.lightningActive = false;
+            updateUI();
+          },
+          () => {
+            state.lightningActive = false;
+            if (applyStatChange(-8, -5)) {
+              updateUI();
+            }
+          }
+        );
+      };
+
+      const handleCultivation = (type) => {
+        if (state.phase !== "cultivation" || state.lightningActive) return;
+        const success =
+          type === "meditate" ? applyStatChange(0, 20) : applyStatChange(25, 0);
+        if (!success) return;
+        state.cultivationClicks += 1;
+        updateUI();
+        if (state.cultivationClicks % 3 === 0) {
+          triggerWeakLightning();
+        }
+      };
+
+      const startBreakthrough = () => {
+        if (!canBreakthrough() || state.phase !== "cultivation" || state.lightningActive) return;
+        state.phase = "breakthrough";
+        updateUI();
+        runTribulation(0);
+      };
+
+      const runTribulation = (index) => {
+        showBolt(
+          1500,
+          () => {
+            if (index < 2) {
+              runTribulation(index + 1);
+              return;
+            }
+            handleBreakthroughSuccess();
+          },
+          () => {
+            handleBreakthroughFailure();
+          }
+        );
+      };
+
+      const handleBreakthroughSuccess = () => {
+        state.tribulationsSurvived += 1;
+        state.realmIndex += 1;
+        clearBolts();
+        if (state.realmIndex >= realms.length - 1) {
+          triggerVictory();
+          return;
+        }
+        state.phase = "cultivation";
+        updateUI();
+      };
+
+      const handleBreakthroughFailure = () => {
+        state.breakthroughFailures += 1;
+        clearBolts();
+        if (!applyStatChange(-15, -10)) return;
+        state.phase = "cultivation";
+        updateUI();
+      };
+
+      const showEndScreen = (title, message, statsHtml, rating) => {
+        clearBolts();
+        elements.endTitle.textContent = title;
+        elements.endMessage.textContent = message;
+        elements.endStats.innerHTML = statsHtml;
+        elements.endRating.textContent = rating;
+        elements.endScreen.classList.remove("hidden");
+        elements.meditateBtn.disabled = true;
+        elements.temperBtn.disabled = true;
+        elements.breakthroughBtn.disabled = true;
+      };
+
+      const triggerVictory = () => {
+        state.phase = "victory";
+        const rating =
+          state.breakthroughFailures === 0
+            ? "True Immortal"
+            : state.breakthroughFailures <= 3
+            ? "Battle-Hardened Cultivator"
+            : "Mortal Pretender";
+
+        const statsHtml = `
+          <div class="summary-item"><span>Final Constitution</span><span>${state.con}</span></div>
+          <div class="summary-item"><span>Final Comprehension</span><span>${state.com}</span></div>
+          <div class="summary-item"><span>Total Cultivation Clicks</span><span>${state.cultivationClicks}</span></div>
+          <div class="summary-item"><span>Tribulations Survived</span><span>${state.tribulationsSurvived}</span></div>
+        `;
+
+        showEndScreen(
+          "Immortal Ascension",
+          "You have defied the heavens and reached eternal clarity.",
+          statsHtml,
+          rating
+        );
+      };
+
+      const resetGame = () => {
+        clearBolts();
+        state.con = 500;
+        state.com = 450;
+        state.realmIndex = 0;
+        state.phase = "cultivation";
+        state.cultivationClicks = 0;
+        state.tribulationsSurvived = 0;
+        state.breakthroughFailures = 0;
+        state.lightningActive = false;
+        elements.endScreen.classList.add("hidden");
+        updateUI();
+      };
+
+      elements.meditateBtn.addEventListener("click", () => handleCultivation("meditate"));
+      elements.temperBtn.addEventListener("click", () => handleCultivation("temper"));
+      elements.breakthroughBtn.addEventListener("click", startBreakthrough);
+      elements.restartBtn.addEventListener("click", resetGame);
+
+      updateUI();
+    </script>
+  </body>
+</html>
